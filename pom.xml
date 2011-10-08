@@ -4,7 +4,7 @@
 
 	<groupId>com.ostendorf</groupId>
 	<artifactId>jsetuid</artifactId>
-	<version>0.0.1</version>
+	<version>0.0.2</version>
 	<packaging>jar</packaging>
 
 	<name>jsetuid</name>
@@ -35,11 +35,18 @@
 		<maven-source-plugin.version>2.1.2</maven-source-plugin.version>
 
 		<jna.version>3.3.0</jna.version>
+		<jna-posix.version>1.0.3</jna-posix.version>
 		<junit.version>4.8.2</junit.version>
 
 	</properties>
 
 	<dependencies>
+		<dependency>
+			<groupId>org.jruby.ext.posix</groupId>
+			<artifactId>jna-posix</artifactId>
+			<version>${jna-posix.version}</version>
+			<scope>compile</scope>
+		</dependency>
 		<dependency>
 			<groupId>net.java.dev.jna</groupId>
 			<artifactId>jna</artifactId>
