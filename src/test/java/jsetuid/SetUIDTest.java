@@ -1,9 +1,12 @@
 package jsetuid;
 
+import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertTrue;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
-import junit.framework.Assert;
+
 import org.jruby.ext.posix.FileStat;
 import org.jruby.ext.posix.POSIX;
 import org.junit.Test;
@@ -29,27 +32,27 @@ public class SetUIDTest {
 		// retrieve GID
 		final int gid1 = posix.getgid();
 		System.out.printf("gid: %s%n", gid1);
-		Assert.assertTrue("gid must be >= 0", gid1 >= 0);
+		assertTrue("gid must be >= 0", gid1 >= 0);
 
 		// retrieve UID
 		final int uid1 = posix.getuid();
 		System.out.printf("uid: %s%n", uid1);
-		Assert.assertTrue("uid must be >= 0", uid1 >= 0);
+		assertTrue("uid must be >= 0", uid1 >= 0);
 
 		System.out.println();
 
 		// change GID, retrieve new value
 		// remember to do this before changing the UID
-		Assert.assertEquals("setgid returned error", 0, posix.setgid(GID));
+		assertEquals("setgid returned error", 0, posix.setgid(GID));
 		final int gid2 = posix.getgid();
 		System.out.printf("gid: %s%n", gid2);
-		Assert.assertTrue("gid must be > 0", gid2 > 0);
+		assertTrue("gid must be > 0", gid2 > 0);
 
 		// change UID, retrieve new value
-		Assert.assertEquals("setuid returned error", 0, posix.setuid(UID));
+		assertEquals("setuid returned error", 0, posix.setuid(UID));
 		final int uid2 = posix.getuid();
 		System.out.printf("uid: %s%n", uid2);
-		Assert.assertTrue("uid must be > 0", uid2 > 0);
+		assertTrue("uid must be > 0", uid2 > 0);
 
 		// set future file permissions
 		posix.umask(UMASK);
@@ -59,7 +62,7 @@ public class SetUIDTest {
 		final OutputStream out = new FileOutputStream(f);
 		out.write(f.getAbsolutePath().getBytes());
 		out.close();
-		// f.delete();
+		f.delete();
 
 	}
 
