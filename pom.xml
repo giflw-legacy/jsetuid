@@ -34,9 +34,9 @@
 
 		<maven-source-plugin.version>2.1.2</maven-source-plugin.version>
 
-		<jna.version>3.3.0</jna.version>
+		<jna.version>3.5.1</jna.version>
 		<jna-posix.version>1.0.3</jna-posix.version>
-		<junit.version>4.8.2</junit.version>
+		<junit.version>4.10</junit.version>
 
 	</properties>
 
