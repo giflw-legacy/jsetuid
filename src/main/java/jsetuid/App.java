@@ -1,22 +1,17 @@
 package jsetuid;
 
-import static junit.framework.Assert.assertEquals;
-import static junit.framework.Assert.assertTrue;
-
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
 
 import org.jruby.ext.posix.FileStat;
 import org.jruby.ext.posix.POSIX;
-import org.junit.Test;
 
-public class SetUIDTest {
+public class App {
 
 	private static final int UMASK = 0127; // -rw-r-----
 
-	@Test
-	public void testPosix() throws Exception {
+	public static void main(final String[] args) throws Exception {
 
 		System.out.println();
 		System.out.println("********** jna-posix **********");
@@ -64,6 +59,16 @@ public class SetUIDTest {
 		out.close();
 		f.delete();
 
+	}
+
+	private static void assertEquals(final String msg, final int v1, final int v2) {
+		if (v1 != v2)
+			throw new AssertionError(msg);
+	}
+
+	private static void assertTrue(final String msg, final boolean value) {
+		if (!value)
+			throw new AssertionError(msg);
 	}
 
 }
