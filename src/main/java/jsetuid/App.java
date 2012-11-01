@@ -146,10 +146,10 @@ public class App {
 
 	private static File makeFile() throws IOException {
 		final File f = new File("setuid-" + System.nanoTime() + ".tmp");
+		f.deleteOnExit();
 		final OutputStream out = new FileOutputStream(f);
 		out.write(f.getAbsolutePath().getBytes());
 		out.close();
-		// f.delete();
 		return f;
 	}
 
