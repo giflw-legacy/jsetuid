@@ -12,8 +12,8 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import org.jruby.ext.posix.FileStat;
-import org.jruby.ext.posix.POSIX;
+import jnr.posix.FileStat;
+import jnr.posix.POSIX;
 
 public class App {
 
@@ -146,10 +146,10 @@ public class App {
 
 	private static File makeFile() throws IOException {
 		final File f = new File("setuid-" + System.nanoTime() + ".tmp");
+		f.deleteOnExit();
 		final OutputStream out = new FileOutputStream(f);
 		out.write(f.getAbsolutePath().getBytes());
 		out.close();
-		// f.delete();
 		return f;
 	}
 

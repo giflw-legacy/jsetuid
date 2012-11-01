@@ -19,9 +19,11 @@ package jsetuid;
 import java.io.File;
 import java.io.InputStream;
 import java.io.PrintStream;
-import org.jruby.ext.posix.POSIX;
-import org.jruby.ext.posix.POSIXFactory;
-import org.jruby.ext.posix.POSIXHandler;
+
+import jnr.constants.platform.Errno;
+import jnr.posix.POSIX;
+import jnr.posix.POSIXFactory;
+import jnr.posix.POSIXHandler;
 
 /**
  * Copy of org.gradle.util.PosixUtil
@@ -31,44 +33,56 @@ public class PosixUtil {
 
 	private static class POSIXHandlerImpl implements POSIXHandler {
 
-		public void error(final POSIX.ERRORS errors, final String message) {
+		@Override
+		public void error(final Errno error, final String extraData) {
 			throw new UnsupportedOperationException();
 		}
 
+		@Override
 		public File getCurrentWorkingDirectory() {
 			throw new UnsupportedOperationException();
 		}
 
+		@Override
 		public String[] getEnv() {
 			throw new UnsupportedOperationException();
 		}
 
+		@Override
 		public PrintStream getErrorStream() {
 			return System.err;
 		}
 
+		@Override
 		public InputStream getInputStream() {
 			return System.in;
 		}
 
+		@Override
 		public PrintStream getOutputStream() {
 			return System.out;
 		}
 
+		@Override
 		public int getPID() {
 			throw new UnsupportedOperationException();
 		}
 
+		@Override
 		public boolean isVerbose() {
 			return false;
 		}
 
+		@Override
 		public void unimplementedError(final String message) {
 			throw new UnsupportedOperationException();
 		}
 
+		@Override
 		public void warn(final WARNING_ID warningId, final String message, final Object... objects) {
+			throw new UnsupportedOperationException();
 		}
+
 	}
 
 	private static final POSIX POSIX = POSIXFactory.getPOSIX(new POSIXHandlerImpl(), true);
