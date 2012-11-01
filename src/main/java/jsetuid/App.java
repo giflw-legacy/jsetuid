@@ -14,10 +14,18 @@ import java.util.concurrent.Executors;
 
 import jnr.posix.FileStat;
 import jnr.posix.POSIX;
+import jnr.posix.POSIXFactory;
 
+/**
+ * Test application to demonstrate how to start a Java program as root and then to later drop its
+ * permissions to that of a normal user.
+ * 
+ * @author karl
+ * 
+ */
 public class App {
 
-	public static class UserGroup {
+	private static class UserGroup {
 		public final int gid;
 		public final int uid;
 
@@ -27,7 +35,8 @@ public class App {
 		}
 	}
 
-	private static POSIX posix = null;
+	private static final POSIX posix = POSIXFactory.getPOSIX();
+	private static final int PRIVILEGED_PORT = 1;
 
 	public static void main(final String[] args) throws Exception {
 
@@ -35,9 +44,6 @@ public class App {
 		System.out.println("Drop privileges test program.");
 		System.out.println();
 
-		final int privilegedPort = 1;
-
-		posix = PosixUtil.current();
 		posix.umask(0177); // -rw-------
 
 		// confirm current user is root
@@ -56,7 +62,7 @@ public class App {
 		System.out.println("Normal user is not root.");
 
 		// open server socket on privileged port
-		final ServerSocket rootSocket = new ServerSocket(privilegedPort);
+		final ServerSocket rootSocket = new ServerSocket(PRIVILEGED_PORT);
 		System.out.println("Opened server socket on privileged port.");
 
 		// change to normal user
@@ -72,7 +78,7 @@ public class App {
 		System.out.println("File created is owned by normal user.");
 
 		// test that server socket can accept connections as normal user
-		testServerSocket(rootSocket, privilegedPort);
+		testServerSocket(rootSocket, PRIVILEGED_PORT);
 
 	}
 
