@@ -12,8 +12,8 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import org.jruby.ext.posix.FileStat;
-import org.jruby.ext.posix.POSIX;
+import jnr.posix.FileStat;
+import jnr.posix.POSIX;
 
 public class App {
 
