@@ -30,11 +30,11 @@ public class App {
 		}
 	}
 
+	private static final int PRIVILEGED_PORT = 1;
+
 	static {
 		System.setProperty("java.awt.headless", Boolean.TRUE.toString());
 	}
-
-	private static final int PRIVILEGED_PORT = 1;
 
 	public static void main(final String[] args) throws Exception {
 
