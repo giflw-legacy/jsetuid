@@ -4,7 +4,7 @@
 
 	<groupId>com.ostendorf</groupId>
 	<artifactId>jsetuid</artifactId>
-	<version>0.0.6</version>
+	<version>0.0.7</version>
 	<packaging>jar</packaging>
 
 	<name>jsetuid</name>
@@ -12,7 +12,7 @@
 
 	<licenses>
 		<license>
-			<name>Apache v2</name>
+			<name>GPL v2</name>
 		</license>
 	</licenses>
 
@@ -36,15 +36,15 @@
 		<maven-shade-plugin.version>2.0</maven-shade-plugin.version>
 		<maven-source-plugin.version>2.2.1</maven-source-plugin.version>
 
-		<jnr-posix.version>2.3.1</jnr-posix.version>
+		<jna.version>3.5.1</jna.version>
 
 	</properties>
 
 	<dependencies>
 		<dependency>
-			<groupId>com.github.jnr</groupId>
-			<artifactId>jnr-posix</artifactId>
-			<version>${jnr-posix.version}</version>
+			<groupId>net.java.dev.jna</groupId>
+			<artifactId>jna</artifactId>
+			<version>${jna.version}</version>
 			<scope>compile</scope>
 		</dependency>
 	</dependencies>

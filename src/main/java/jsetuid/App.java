@@ -1,7 +1,6 @@
 package jsetuid;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -11,10 +10,6 @@ import java.net.Socket;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-
-import jnr.posix.FileStat;
-import jnr.posix.POSIX;
-import jnr.posix.POSIXFactory;
 
 /**
  * Test application to demonstrate how to start a Java program as root and then to later drop its
@@ -35,47 +30,41 @@ public class App {
 		}
 	}
 
-	private static final POSIX posix = POSIXFactory.getPOSIX();
 	private static final int PRIVILEGED_PORT = 1;
+
+	static {
+		System.setProperty("java.awt.headless", Boolean.TRUE.toString());
+	}
 
 	public static void main(final String[] args) throws Exception {
 
-		System.out.println();
-		System.out.println("Drop privileges test program.");
-		System.out.println();
+		if (args.length == 0) {
+			System.out.println("Usage: jsetuid <username>");
+			return;
+		}
 
-		posix.umask(0177); // -rw-------
+		final Passwd passwd = LibC.getpwnam(args[0]);
+		System.out.println("retrieved user info");
 
-		// confirm current user is root
 		assertRoot(getCurrentUser());
 		System.out.println("User is root.");
-
-		// create file accessible only to root
-		final File rootFile = makeFile();
-		// assertRoot(getOwnerOfFile(rootFile));
-		assertUserIsRoot(getOwnerOfFile(rootFile));
-		System.out.println("File created is owned by root.");
-
-		// discover uid/gid of normal user on system
-		final UserGroup normalUser = getOwnerOfCurrentWorkingDirectory();
-		assertNotRoot(normalUser);
-		System.out.println("Normal user is not root.");
 
 		// open server socket on privileged port
 		final ServerSocket rootSocket = new ServerSocket(PRIVILEGED_PORT);
 		System.out.println("Opened server socket on privileged port.");
 
 		// change to normal user
-		dropPrivilegesToUser(normalUser);
+		dropPrivilegesToUser(new UserGroup(passwd.pw_uid, passwd.pw_gid));
+		assertNotRoot(getCurrentUser());
+		System.setProperty("user.name", passwd.pw_name);
+		System.setProperty("user.home", passwd.pw_dir);
 		System.out.println("Dropped privileges to normal user.");
 
-		// check that new user cannot access root-only file
-		assertFileInaccessible(rootFile);
-		System.out.println("Normal user cannot read root-only file.");
-
 		// create file as normal user
-		assertNotRoot(getOwnerOfFile(makeFile()));
-		System.out.println("File created is owned by normal user.");
+		LibC.umask(0177); // -rw-------
+		makeFile();
+
+		System.out.println();
 
 		// test that server socket can accept connections as normal user
 		testServerSocket(rootSocket, PRIVILEGED_PORT);
@@ -85,20 +74,6 @@ public class App {
 	private static void assertEquals(final String msg, final int v1, final int v2) {
 		if (v1 != v2)
 			throw new AssertionError(msg + " -- v1: " + v1 + ", v2: " + v2);
-	}
-
-	private static void assertFileInaccessible(final File f) {
-
-		if (f.canRead())
-			throw new AssertionError("file can be read");
-
-		try {
-			loadFile(f);
-			throw new AssertionError("file is accessible");
-		} catch (final Exception x) {
-			// ignore, expected
-		}
-
 	}
 
 	private static void assertNotRoot(final UserGroup u) {
@@ -116,43 +91,18 @@ public class App {
 			throw new AssertionError(msg);
 	}
 
-	private static void assertUserIsRoot(final UserGroup u) {
-		assertEquals("uid is not 0", 0, u.uid);
-	}
-
 	private static void dropPrivilegesToUser(final UserGroup u) {
-		assertEquals("setgid returned error", 0, posix.setgid(u.gid));
-		assertEquals("setuid returned error", 0, posix.setuid(u.uid));
+		assertEquals("setgid returned error", 0, LibC.setgid(u.gid));
+		assertEquals("setuid returned error", 0, LibC.setuid(u.uid));
 	}
 
 	private static UserGroup getCurrentUser() {
-		return new UserGroup(posix.getuid(), posix.getgid());
-	}
-
-	private static UserGroup getOwnerOfCurrentWorkingDirectory() {
-		return getOwnerOfFile(System.getProperty("user.dir"));
-	}
-
-	private static UserGroup getOwnerOfFile(final File f) {
-		return getOwnerOfFile(f.getPath());
-	}
-
-	private static UserGroup getOwnerOfFile(final String path) {
-		final FileStat st = posix.lstat(path);
-		return new UserGroup(st.uid(), st.gid());
-	}
-
-	private static byte[] loadFile(final File f) throws IOException {
-		final byte[] contents = new byte[(int) f.length()];
-		final InputStream in = new FileInputStream(f);
-		in.read(contents);
-		in.close();
-		return contents;
+		return new UserGroup(LibC.getuid(), LibC.getgid());
 	}
 
 	private static File makeFile() throws IOException {
 		final File f = new File("setuid-" + System.nanoTime() + ".tmp");
-		f.deleteOnExit();
+		// f.deleteOnExit();
 		final OutputStream out = new FileOutputStream(f);
 		out.write(f.getAbsolutePath().getBytes());
 		out.close();
