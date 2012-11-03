@@ -29,9 +29,6 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import com.ostendorf.jsetuid.LibC;
-import com.ostendorf.jsetuid.Passwd;
-
 /**
  * Test application to demonstrate how to start a Java program as root and then to later drop its
  * permissions to that of a normal user.
@@ -124,9 +121,9 @@ public class App {
 	private static File makeFile() throws IOException {
 		final File f = new File("setuid-" + System.nanoTime() + ".tmp");
 		// f.deleteOnExit();
-		final OutputStream out = new FileOutputStream(f);
-		out.write(f.getAbsolutePath().getBytes());
-		out.close();
+		try (OutputStream out = new FileOutputStream(f)) {
+			out.write(f.getAbsolutePath().getBytes());
+		}
 		return f;
 	}
 
@@ -143,15 +140,10 @@ public class App {
 			x.submit(new Runnable() {
 				@Override
 				public void run() {
-					try {
-						System.out.println("Server awaiting connections.");
-						final Socket b = s.accept();
-						System.out.println("Server received client connection.");
+					System.out.println("Server awaiting connections.");
+					try (final Socket b = s.accept();
 						final InputStream in = b.getInputStream();
-						final OutputStream out = b.getOutputStream();
-						in.close();
-						out.close();
-						b.close();
+						final OutputStream out = b.getOutputStream();) {
 						System.out.println("Server closed client connection.");
 					} catch (final IOException x) {
 						x.printStackTrace();
@@ -161,10 +153,19 @@ public class App {
 			});
 
 			System.out.println("Client connecting to privileged port.");
-			final Socket client = new Socket("localhost", port);
-			System.out.println("Client connected to privileged port.");
-			latch.await();
-			client.close();
+			Socket client = null;
+			try {
+				client = new Socket("localhost", port);
+				System.out.println("Client connected to privileged port.");
+				latch.await();
+			} finally {
+				try {
+					if (client != null)
+						client.close();
+				} catch (final Exception xx) {
+					// ignore
+				}
+			}
 			System.out.println("Client closed connection.");
 
 			x.shutdownNow();
@@ -176,5 +177,4 @@ public class App {
 		System.out.println("Network tests complete.");
 
 	}
-
 }
